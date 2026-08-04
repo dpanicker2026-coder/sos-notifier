@@ -1,0 +1,15 @@
+{
+  "name": "famloc-sos-notifier",
+  "version": "1.0.0",
+  "description": "Standalone SOS delivery service for FamLoc — checks Firebase for active SOS alerts and sends FCM push notifications, independent of the app's own background task.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
