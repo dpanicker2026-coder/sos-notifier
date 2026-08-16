@@ -63,8 +63,25 @@ async function checkAndNotify() {
             },
             data: { type: 'sos', alertId },
             android: {
-              priority: 'high',
-              notification: { channelId: 'sos-alerts', sound: 'alarm' },
+              priority: 'high', // CRITICAL: high priority to break through Doze mode
+              notification: { 
+                channelId: 'sos-alerts', 
+                sound: 'default',
+                color: '#FF0000',
+                priority: 'max',
+              },
+            },
+            apns: {
+              payload: {
+                aps: {
+                  'content-available': 1,
+                  alert: {
+                    title: `🆘 SOS from ${alert.name || 'a family member'}`,
+                    body: 'Tap to open FamLoc and see their location.',
+                  },
+                  sound: 'default',
+                },
+              },
             },
           });
           console.log(
