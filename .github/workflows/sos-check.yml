@@ -14,11 +14,22 @@ jobs:
         with:
           node-version: '18'
       
+      - name: Check Node and npm versions
+        run: |
+          node --version
+          npm --version
+      
       - name: Install dependencies
         run: npm install
+      
+      - name: List installed packages
+        run: npm list --depth=0
       
       - name: Run SOS notifier check
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
-        run: node server.js
+        run: |
+          echo "Starting SOS notifier..."
+          node server.js
+          echo "SOS notifier completed successfully"
