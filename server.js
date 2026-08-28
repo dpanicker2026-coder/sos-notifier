@@ -100,20 +100,31 @@ async function checkAndNotify() {
   }
 }
 
-// Lightweight HTTP server — mainly exists so an external uptime pinger can
-// hit `/health` periodically to prevent Render's free-tier services from
-// spinning down after 15 minutes of no incoming requests. The interval
-// loop below only keeps running while the process itself is alive, so this
-// endpoint is what makes that possible on the free tier.
-http
-  .createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('FamLoc SOS notifier is running');
-  })
-  .listen(PORT, () => {
-    console.log(`Health server listening on port ${PORT}`);
-  });
+// Check if running in GitHub Actions (no need for persistent server)
+const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
 
-console.log(`Starting SOS check loop, every ${CHECK_INTERVAL_MS / 1000}s`);
-checkAndNotify();
-setInterval(checkAndNotify, CHECK_INTERVAL_MS);
+if (isGitHubActions) {
+  // GitHub Actions mode: run once and exit
+  console.log('Running in GitHub Actions mode - single check and exit');
+  checkAndNotify().then(() => {
+    console.log('SOS check completed successfully');
+    process.exit(0);
+  }).catch((err) => {
+    console.error('SOS check failed:', err);
+    process.exit(1);
+  });
+} else {
+  // Render/persistent mode: run with health server and interval loop
+  http
+    .createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('FamLoc SOS notifier is running');
+    })
+    .listen(PORT, () => {
+      console.log(`Health server listening on port ${PORT}`);
+    });
+
+  console.log(`Starting SOS check loop, every ${CHECK_INTERVAL_MS / 1000}s`);
+  checkAndNotify();
+  setInterval(checkAndNotify, CHECK_INTERVAL_MS);
+}
